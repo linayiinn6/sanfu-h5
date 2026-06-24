@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>搭子综合症：寻找你的生活解药</title>
+    <style>
+        /* --- 基础扁平化样式重置 --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #E6F3F8; 
+            color: #333333;
+        }
+
+        /* --- H5 视窗容器（锁定手机比例） --- */
+        .h5-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            background-color: #F7F5F0;
+        }
+
+        /* --- 页面通用切换逻辑 --- */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 16px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .page.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* 通用时间标签样式 */
+        .header-zone {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 10px;
+            z-index: 10;
+        }
+        .time-tag {
+            font-size: 13px;
+            color: #6A8D9D;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            letter-spacing: 1px;
+            border: 1.5px solid #333333;
+        }
+
+        /* ==========================================
+           PAGE 1: 趣味开场（完美自适应首图）
+           ========================================== */
+        #page1 {
+            background-color: #E6F3F8;
+            justify-content: flex-start;
+        }
+        .poster-main-wrapper {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            max-height: 82vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .poster-bg-img {
+            width: auto;
+            height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            border: 4px solid #333333;
+            border-radius: 24px;
+            background-color: #FFF;
+            box-shadow: 0 10px 0 #333333;
+        }
+        .click-ripple-hint {
+            position: absolute;
+            bottom: 35px;
+            background-color: #FFD25D;
+            border: 3px solid #333333;
+            border-radius: 50px;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #333333;
+            animation: bounceButton 2s infinite ease-in-out;
+        }
+        .click-ripple-hint:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #333333;
+        }
+        .btn-pulse-text {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333333;
+        }
+        .finger-icon {
+            font-size: 16px;
+            animation: fingerTap 1s infinite alternate;
+        }
+
+        /* ==========================================
+           PAGE 2: 情景测试交互页（格子间场景）
+           ========================================== */
+        #page2 {
+            background-color: #F7F5F0;
+            padding: 24px 20px;
+        }
+        .question-box {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .q-title {
+            font-size: 18px;
+            color: #333333;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .q-sub {
+            font-size: 13px;
+            color: #777777;
+        }
+        /* 拖拽投放区域 - 格子间背景图 */
+        .drop-target-desk {
+            width: 100%;
+            flex: 1;
+            max-height: 52vh;
+            border: 4px solid #333333;
+            border-radius: 24px;
+            position: relative;
+            transition: background-color 0.2s, transform 0.2s;
+            overflow: hidden;
+            box-shadow: 0 6px 0 #333333;
+            background-color: #FFF;
+        }
+        .drop-target-desk.hovered {
+            background-color: #E2F0D9;
+            transform: scale(1.01);
+        }
+        .bg-vector-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .drop-overlay-text {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #333333;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333333;
+            pointer-events: none;
+            box-shadow: 0 3px 0 #333333;
+        }
+        /* 底部三福道具栏 */
+        .items-dock {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background: #FFFFFF;
+            border: 4px solid #333333;
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 0 6px 0 #333333;
+            margin-top: 16px;
+        }
+        .draggable-item {
+            width: 80px;
+            height: 80px;
+            background-color: #FFF6DF;
+            border: 3px solid #333333;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            touch-action: none; 
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 3px 0 #333333;
+        }
+        .draggable-item img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* ==========================================
+           PAGE 5: 结果海报生成页
+           ========================================== */
+        #page5 {
+            background: linear-gradient(180deg, #FFF6DF 0%, #F7F5F0 100%);
+            padding: 20px 16px;
+        }
+        .poster-card {
+            width: 100%;
+            flex: 1;
+            background-color: #FFFFFF;
+            border: 4px solid #333333;
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 0 #333333;
+            margin-bottom: 16px;
+        }
+        .poster-header {
+            border-bottom: 3px dashed #333333;
+            padding-bottom: 10px;
+        }
+        .result-tag {
+            font-size: 22px;
+            font-weight: 900;
+            color: #E76F51; 
+            letter-spacing: 1px;
+        }
+        .result-desc {
+            font-size: 13px;
+            color: #555555;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+        /* 海报图动态转换区 */
+        .poster-art-zone {
+            width: 100%;
+            flex: 1;
+            max-height: 42vh;
+            background-color: #F7F5F0;
+            border: 3px solid #333333;
+            border-radius: 16px;
+            margin: 12px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .prescription-zone {
+            display: flex;
+            align-items: center;
+            background-color: #FFF6DF;
+            border: 3px solid #333333;
+            border-radius: 12px;
+            padding: 10px;
+        }
+        .rx-badge {
+            background-color: #333333;
+            color: #FFF;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .rx-goods {
+            font-size: 13px;
+            font-weight: bold;
+            color: #333333;
+        }
+        .poster-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .brand-logo-placeholder {
+            font-size: 15px;
+            font-weight: 900;
+            color: #333333;
+            letter-spacing: 1px;
+        }
+        .share-tips {
+            font-size: 11px;
+            color: #999999;
+        }
+        .action-btn {
+            width: 100%;
+            background-color: #333333;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 5px 0 #000000;
+        }
+        .action-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #000000;
+        }
+
+        /* --- 动画效果 --- */
+        @keyframes bounceButton {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes fingerTap {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15) translateY(2px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="h5-container">
+
+        <div id="page1" class="page active">
+            <div class="header-zone">
+                <span class="time-tag">星期二下午 14:30</span>
+            </div>
+            
+            <div class="poster-main-wrapper">
+                <img src="2b7cf3f0-824a-4802-b208-c87f761a22f2.jfif" class="poster-bg-img" alt="搭子综合症解药瓶">
+                
+                <div class="click-ripple-hint" id="startBtn">
+                    <span class="finger-icon">👇</span>
+                    <span class="btn-pulse-text">点击药瓶开启解药</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="page2" class="page">
+            <div class="question-box">
+                <h2 class="q-title">Q1：当群里发出“收到请回复”时</h2>
+                <p class="q-sub">将下方的“解压道具”拖拽投入到格子间里</p>
+            </div>
+
+            <div class="drop-target-desk" id="dropTarget">
+                <img src="Gemini_Generated_Image_3caqos3caqos3caq.png" class="bg-vector-img" alt="办公桌格子间">
+                <div class="drop-overlay-text">此处释放解药 💊</div>
+            </div>
+
+            <div class="items-dock">
+                <div class="draggable-item" id="itemA" data-choice="A">
+                    <img src="dbaa6a3a-60b8-4313-b3bb-c602db416577.png" alt="毛绒小狗">
+                </div>
+                <div class="draggable-item" id="itemB" data-choice="B">
+                    <img src="f4398e77-a8af-43f8-a3db-98f37408a4f3.png" alt="小鸡捏捏乐">
+                </div>
+                <div class="draggable-item" id="itemC" data-choice="C">
+                    <img src="fb24a624-6a3d-4c63-baee-cbefd6fcb6eb.png" alt="大容量吨吨杯">
+                </div>
+            </div>
+        </div>
+
+        <div id="page5" class="page">
+            <div class="poster-card">
+                <div class="poster-header">
+                    <div class="result-tag" id="resultTitle">重度毛绒依赖症</div>
+                    <div class="result-desc" id="resultDesc">加载中...</div>
+                </div>
+
+                <div class="poster-art-zone">
+                    <img src="" class="bg-vector-img" id="posterImg" alt="结果同框海报">
+                </div>
+
+                <div class="prescription-zone">
+                    <span class="rx-badge">三福处方</span>
+                    <span class="rx-goods" id="resultRx">加载中...</span>
+                </div>
+
+                <div class="poster-footer">
+                    <div class="brand-logo-placeholder">SANFU 三福</div>
+                    <span class="share-tips">长按图片保存报告 寻找搭子</span>
+                </div>
+            </div>
+
+            <a href="https://www.sanfu.com" class="action-btn">领取我的实体解药</a>
+        </div>
+
+    </div>
+
+    <script>
+        function switchPage(currentId, nextId) {
+            const current = document.getElementById(currentId);
+            const next = document.getElementById(nextId);
+            
+            current.style.opacity = 0;
+            setTimeout(() => {
+                current.classList.remove('active');
+                next.classList.add('active');
+                setTimeout(() => next.style.opacity = 1, 50);
+            }, 500);
+        }
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            switchPage('page1', 'page2');
+        });
+
+        // 核心双端兼容拖拽逻辑
+        const draggableItems = document.querySelectorAll('.draggable-item');
+        const dropTarget = document.getElementById('dropTarget');
+
+        let activeItem = null;
+        let initialX = 0, initialY = 0;
+        let currentX = 0, currentY = 0;
+        let xOffset = 0, yOffset = 0;
+
+        draggableItems.forEach(item => {
+            item.addEventListener('touchstart', dragStart, false);
+            item.addEventListener('touchmove', drag, false);
+            item.addEventListener('touchend', dragEnd, false);
+            item.addEventListener('mousedown', dragStart, false);
+        });
+
+        window.addEventListener('mousemove', drag, false);
+        window.addEventListener('mouseup', dragEnd, false);
+
+        function dragStart(e) {
+            const targetItem = e.target.closest('.draggable-item');
+            if (!targetItem) return;
+
+            activeItem = targetItem;
+            if (e.type === "mousedown") {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            } else if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            }
+            activeItem.style.zIndex = 100;
+        }
+
+        function drag(e) {
+            if (activeItem) {
+                e.preventDefault();
+                if (e.type === "mousemove") {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                } else if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                }
+                xOffset = currentX;
+                yOffset = currentY;
+                setTranslate(currentX, currentY, activeItem);
+
+                // 碰撞检测
+                const targetRect = dropTarget.getBoundingClientRect();
+                const itemRect = activeItem.getBoundingClientRect();
+
+                if (itemRect.left < targetRect.right &&
+                    itemRect.right > targetRect.left &&
+                    itemRect.top < targetRect.bottom &&
+                    itemRect.bottom > targetRect.top) {
+                    dropTarget.classList.add('hovered');
+                } else {
+                    dropTarget.classList.remove('hovered');
+                }
+            }
+        }
+
+        function dragEnd(e) {
+            if (!activeItem) return;
+            
+            const targetRect = dropTarget.getBoundingClientRect();
+            const itemRect = activeItem.getBoundingClientRect();
+
+            if (itemRect.left < targetRect.right &&
+                itemRect.right > targetRect.left &&
+                itemRect.top < targetRect.bottom &&
+                itemRect.bottom > targetRect.top) {
+                
+                const choice = activeItem.getAttribute('data-choice');
+                generateResult(choice);
+                switchPage('page2', 'page5');
+            } else {
+                setTranslate(0, 0, activeItem);
+            }
+            
+            xOffset = 0; yOffset = 0;
+            dropTarget.classList.remove('hovered');
+            activeItem.style.zIndex = 10;
+            activeItem = null;
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+        }
+
+        // 纠正后的映射函数：把选中的玩偶道具完美连接到对应的女生大图上
+        function generateResult(choice) {
+            const titleEl = document.getElementById('resultTitle');
+            const descEl = document.getElementById('resultDesc');
+            const rxEl = document.getElementById('resultRx');
+            const posterImg = document.getElementById('posterImg');
+
+            if (choice === 'A') {
+                titleEl.innerText = "重度毛绒依赖症";
+                descEl.innerText = "一面临 DDL 脑电波就自动静音。比起无用社交，你更想把脸埋进软绵绵的小狗公仔里治愈世界。";
+                rxEl.innerText = "特效解药：三福软萌趴趴狗毛绒挂件";
+                posterImg.src = "8cd58849-a8b6-4334-af29-70e732212f36.png"; // 对应：女孩抱小狗大图
+            } else if (choice === 'B') {
+                titleEl.innerText = "隐形出逃狂热者";
+                descEl.innerText = "表面上在有条不紊地疯狂敲击键盘，内心其实被怪趣小鸡捏捏乐瞬间激活，随时准备释放压力！";
+                rxEl.innerText = "特效解药：三福怪趣解压小鸡捏捏乐";
+                posterImg.src = "730eeec8-b321-4bab-b944-6907a46bc0f6.png"; // 对应：女孩拿小鸡捏捏乐大图
+            } else if (choice === 'C') {
+                titleEl.innerText = "重度无力社交星人";
+                descEl.innerText = "嘴上答应着‘收到收到’，背地里却在疯狂吨吨吨补充水分。用超高颜值吨吨杯对抗生活的疲惫。";
+                rxEl.innerText = "特效解药：三福奶系渐变高颜值吨吨杯";
+                posterImg.src = "cc0103f0-4924-4f3d-a846-01aca26f9bbc.png"; // 对应：女孩举吨吨杯大图
+            }
+        }
+    </script>
+</body>
+</html>
